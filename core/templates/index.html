@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<!-- Modern Hero Section (Optimized padding for mobile) -->
+<div class="p-4 p-md-5 mb-4 bg-body rounded-4 shadow-sm border text-center mt-3">
+    <div class="container-fluid py-2">
+        <h1 class="display-6 display-md-5 fw-bold">Welcome to Knowledge Bank</h1>
+        <p class="col-lg-8 mx-auto fs-6 fs-md-5 text-muted mt-2">
+            Manage your library inventory, discover new books, and track issues seamlessly on any device.
+        </p>
+    </div>
+</div>
+
+<!-- Categories Filter: Upgraded to a sleek mobile horizontal scrollbar -->
+<div class="mb-4">
+    <h4 class="fw-bold mb-3 fs-5">Browse by Category</h4>
+    <!-- overflow-auto and flex-nowrap allow smooth thumb swiping on phones without breaking layout -->
+    <div class="d-flex flex-row flex-nowrap overflow-auto gap-2 pb-2 scrollbar-none" style="-webkit-overflow-scrolling: touch; scrollbar-width: none;">
+
+        <a href="{% url 'home' %}" class="flex-shrink-0 btn btn-sm rounded-pill px-3 {% if not request.resolver_match.kwargs.book_category %}btn-primary fw-bold{% else %}btn-outline-secondary{% endif %}">
+            All Categories
+        </a>
+
+        {% for cat in categories %}
+        <a href="{% url 'books_filter' cat %}" class="flex-shrink-0 btn btn-sm rounded-pill px-3 {% if request.resolver_match.kwargs.book_category == cat %}btn-primary fw-bold{% else %}btn-outline-secondary{% endif %}">
+            {{ cat }}
+        </a>
+        {% endfor %}
+
+    </div>
+</div>
+
+<!-- Dynamic Books Grid & Live Search -->
+<div class="row align-items-center mb-3 mt-4">
+    <div class="col-7">
+        <h4 class="fw-bold m-0 fs-5">Library Catalog</h4>
+        <span class="badge bg-secondary rounded-pill px-3 py-1 mt-1 small" id="bookCount">{{ books|length }} books found</span>
+    </div>
+    <div class="col-5">
+        <input type="text" id="liveSearch" class="form-control form-control-sm rounded-pill border-2 shadow-sm" placeholder="Search books...">
+    </div>
+</div>
+
+<!-- Responsive Book Grid: 2 columns on phones, 3-4 on desktops -->
+<div class="row row-cols-2 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-3 g-md-4 mb-5" id="bookGrid">
+    {% for book in books %}
+    <div class="col book-card">
+        <div class="card h-100 shadow-sm border-0 rounded-3 overflow-hidden" style="transition: transform 0.2s;">
+
+            <!-- Book Cover -->
+            <div class="position-relative bg-light" style="height: 200px; overflow: hidden;">
+                {% if book.image %}
+                <img src="{{ book.image.url }}" class="card-img-top w-100 h-100" alt="{{ book.title }}" style="object-fit: cover;">
+                {% else %}
+                <!-- Upgraded: Automatically generates a gorgeous colored book cover if no image exists -->
+                <div class="d-flex flex-column align-items-center justify-content-center h-100 p-3 text-center text-white bg-gradient shadow-inner" style="background: linear-gradient(135deg, #3b82f6, #1e3a8a);">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-book mb-2 opacity-75" viewBox="0 0 16 16">
+                        <path d="M1 2.828c.885-.37 2.154-.769 3.388-.893 1.33-.134 2.458.063 3.112.752v9.746c-.935-.53-2.12-.603-3.213-.493-1.18.12-2.37.461-3.287.811V2.828zm7.5-.141c.654-.689 1.782-.886 3.112-.752 1.234.124 2.503.523 3.388.893v9.923c-.918-.35-2.107-.692-3.287-.81-1.094-.111-2.278-.039-3.213.492V2.687zM8 1.783C7.015.936 5.587.81 4.287.94c-1.514.153-3.042.672-3.994 1.105A.5.5 0 0 0 0 2.5v11a.5.5 0 0 0 .707.455c.882-.4 2.303-.88 3.564-.954 1.07-.064 2.186.086 3.729.743v.075a.5.5 0 0 0 1 0v-.075c1.543-.657 2.659-.807 3.729-.743 1.261.074 2.682.555 3.564.955a.5.5 0 0 0 .707-.456V2.5a.5.5 0 0 0-.293-.455c-.952-.433-2.48-.952-3.994-1.105C10.413.809 8.985.936 8 1.783z"/>
+                    </svg>
+                    <span class="fw-bold small text-truncate w-100 px-2">{{ book.title }}</span>
+                    <span class="badge bg-light text-dark mt-2" style="font-size: 0.65rem;">AI Library Portal</span>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Book Info -->
+            <div class="card-body d-flex flex-column p-3">
+                <h6 class="card-title fw-bold text-truncate mb-1" title="{{ book.title }}">{{ book.title }}</h6>
+                <span class="text-success fw-bold small mb-2">${{ book.price }}</span>
+            </div>
+
+            <!-- Action Button -->
+            <div class="card-footer bg-body border-0 pt-0 pb-3 px-3">
+                <a href="{% url 'book_detail' book.id %}" class="btn btn-outline-primary btn-sm w-100 rounded-pill fw-semibold">View Details</a>
+            </div>
+
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12 text-center py-5">
+        <h6 class="text-muted">No books found in this category.</h6>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Live Search JavaScript -->
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const searchInput = document.getElementById('liveSearch');
+        const bookCards = document.querySelectorAll('.book-card');
+        const bookCountDisplay = document.getElementById('bookCount');
+
+        if (searchInput) {
+            searchInput.addEventListener('keyup', function() {
+                let filter = searchInput.value.toLowerCase();
+                let visibleCount = 0;
+
+                bookCards.forEach(function(card) {
+                    let text = card.textContent.toLowerCase();
+                    if (text.includes(filter)) {
+                        card.style.display = '';
+                        visibleCount++;
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+
+                bookCountDisplay.textContent = visibleCount === 1 ? '1 book found' : visibleCount + ' books found';
+            });
+        }
+    });
+</script>
+{% endblock %}

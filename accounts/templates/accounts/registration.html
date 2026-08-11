@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Register - AI Library Portal{% endblock %}
+
+{% block content %}
+<div class="container mt-5 mb-5">
+    <div class="row justify-content-center">
+        <!-- We use col-md-8 col-lg-6 to keep the form from stretching too wide on large screens -->
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow-lg border-0 bg-body rounded-4">
+                <div class="card-body p-4 p-md-5">
+
+                    <!-- Header Section -->
+                    <div class="text-center mb-4">
+                        <h2 class="fw-bold mb-2">Create an Account</h2>
+                        <p class="text-muted">Join the AI Library Portal today.</p>
+                    </div>
+
+                    <!-- Form Section -->
+                    <form method="POST" action="" novalidate>
+                        {% csrf_token %}
+
+                        <!-- The crispy filter automatically applies Bootstrap 5 classes to every input! -->
+                        {{ form|crispy }}
+
+                        <!-- Submit Button -->
+                        <div class="d-grid mt-5">
+                            <button type="submit" class="btn btn-primary btn-lg rounded-pill fw-bold shadow-sm">
+                                Register Account
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Login Redirect -->
+                    <div class="text-center mt-4">
+                        <p class="text-muted mb-0">
+                            Already have an account?
+                            <a href="{% url 'login' %}" class="text-decoration-none fw-bold">Sign in here</a>.
+                        </p>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

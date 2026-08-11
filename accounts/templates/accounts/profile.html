@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+{% load humanize %}
+
+{% block title %}My Profile - AI Library Portal{% endblock %}
+
+{% block content %}
+<div class="container mt-5 mb-5">
+
+    <!-- Dashboard Header Card -->
+    <div class="card shadow-sm border-0 bg-body rounded-4 mb-4">
+        <div class="card-body p-4 p-md-5 d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div>
+                <h2 class="fw-bold mb-1">Welcome, {{ user.first_name|default:user.username }}!</h2>
+                <p class="text-muted mb-0 fs-5">Account NO: <span class="text-primary fw-bold">{{ user.account.account_no }}</span></p>
+            </div>
+            <div class="text-md-end">
+                <p class="text-muted mb-1">Current Balance</p>
+                <h3 class="text-success fw-bold mb-0">${{ user.account.balance|default:"0.00" }}</h3>
+            </div>
+        </div>
+    </div>
+
+    <!-- Borrowed Books Section -->
+    <div class="card shadow-sm border-0 bg-body rounded-4 p-4 p-md-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h3 class="fw-bold mb-0">My Borrowed Books</h3>
+        </div>
+
+        {% if books_with_history %}
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                <tr>
+                    <th scope="col" class="py-3">ISBN / ID</th>
+                    <th scope="col" class="py-3">Book Title</th>
+                    <th scope="col" class="py-3">Price</th>
+                    <th scope="col" class="py-3">Borrowing History</th>
+                    <th scope="col" class="text-center py-3">Action</th>
+                </tr>
+                </thead>
+                <tbody class="border-top-0">
+                {% for item in books_with_history %}
+                <tr>
+                    <td class="text-muted fw-semibold">#{{ item.book.id }}</td>
+                    <td class="fw-bold">{{ item.book.title }}</td>
+                    <td class="text-success fw-semibold">${{ item.book.price }}</td>
+
+                    <!-- History List -->
+                    <td>
+                        <ul class="list-unstyled mb-0" style="font-size: 0.9rem;">
+                            {% for transaction in item.history %}
+                            <li class="mb-1">
+                                    <span class="badge bg-secondary bg-opacity-75 me-2">
+                                        {{ transaction.timestamp|date:"M d, Y, h:i a" }}
+                                    </span>
+                                <span class="text-muted">Balance After:</span>
+                                <strong class="text-body">${{ transaction.balance_after_transaction }}</strong>
+                            </li>
+                            {% empty %}
+                            <li class="text-muted">No history found.</li>
+                            {% endfor %}
+                        </ul>
+                    </td>
+
+                    <!-- Action Button -->
+                    <td class="text-center">
+                        <a href="{% url 'book_detail' item.book.id %}" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-bold">
+                            View / Return
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+
+        <!-- Empty State (If no books are borrowed) -->
+        <div class="text-center py-5">
+            <div class="text-muted mb-3">
+                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" class="bi bi-journal-x" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd" d="M6.146 6.146a.5.5 0 0 1 .708 0L8 7.293l1.146-1.147a.5.5 0 1 1 .708.708L8.707 8l1.147 1.146a.5.5 0 0 1-.708.708L8 8.707 6.854 9.854a.5.5 0 0 1-.708-.708L7.293 8 6.146 6.854a.5.5 0 0 1 0-.708z"/>
+                    <path d="M3 0h10a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2v-1h1v1a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1v1H1V2a2 2 0 0 1 2-2z"/>
+                    <path d="M1 5v-.5a.5.5 0 0 1 1 0V5h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1H1zm0 3v-.5a.5.5 0 0 1 1 0V8h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1H1zm0 3v-.5a.5.5 0 0 1 1 0v.5h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1H1z"/>
+                </svg>
+            </div>
+            <h5>No books borrowed yet.</h5>
+            <p class="text-muted">Explore our catalog and find your next great read!</p>
+            <a href="{% url 'home' %}" class="btn btn-primary rounded-pill mt-2">Browse Catalog</a>
+        </div>
+        {% endif %}
+
+    </div>
+</div>
+{% endblock %}

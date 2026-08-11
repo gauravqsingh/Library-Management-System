@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}{{ book.title }} - AI Library Portal{% endblock %}
+
+{% block content %}
+<div class="container mt-5 mb-5">
+    <div class="row g-5">
+
+        <!-- LEFT COLUMN: Book Cover & Actions -->
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0 bg-body rounded-4 overflow-hidden mb-4 position-sticky" style="top: 20px;">
+                <!-- Cover Image -->
+                {% if book.image %}
+                <img src="{{ book.image.url }}" class="img-fluid w-100" alt="{{ book.title }}">
+                {% else %}
+                <div class="bg-secondary bg-opacity-10 d-flex align-items-center justify-content-center p-5" style="height: 400px;">
+                    <span class="text-muted">No Cover Available</span>
+                </div>
+                {% endif %}
+
+                <!-- Action Forms & Buttons -->
+                <div class="card-body p-4 d-grid gap-3">
+
+                    <!-- Borrow Form -->
+                    <form method="POST" action="">
+                        {% csrf_token %}
+                        <button type="submit" name="borrow" class="btn btn-primary btn-lg rounded-pill fw-bold shadow-sm w-100">
+                            Borrow This Book
+                        </button>
+                    </form>
+
+                    <!-- Return Form -->
+                    <form method="POST" action="">
+                        {% csrf_token %}
+                        <button type="submit" name="return" class="btn btn-outline-danger rounded-pill w-100">
+                            Return Book
+                        </button>
+                    </form>
+
+                    <!-- Wishlist Toggle Button -->
+                    <a href="{% url 'toggle_wishlist' book.id %}" class="btn btn-outline-secondary rounded-pill fw-semibold">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-heart-fill me-1 text-danger" viewBox="0 0 16 16">
+                            <path fill-rule="evenodd" d="M8 1.314C12.438-3.248 23.534 4.735 8 15-7.534 4.736 3.562-3.248 8 1.314z"/>
+                        </svg>
+                        Toggle Wishlist
+                    </a>
+
+                    <a href="{% url 'home' %}" class="btn btn-link text-decoration-none text-muted text-center mt-1">
+                        &larr; Back to Catalog
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT COLUMN: Book Information & Reviews -->
+        <div class="col-md-8">
+            <div class="card shadow-sm border-0 bg-body rounded-4 p-4 p-md-5 mb-5">
+
+                <!-- Title, Price, and Categories Header -->
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div>
+                        <h1 class="fw-bold mb-1 display-5">{{ book.title }}</h1>
+                        <h3 class="text-success fw-bold mt-2 mb-3">
+                            ${{ book.price }}
+                        </h3>
+                    </div>
+
+                    {% if book.categories %}
+                    <span class="badge bg-primary fs-6 rounded-pill px-3 py-2 shadow-sm">
+                        {{ book.categories }}
+                    </span>
+                    {% endif %}
+                </div>
+
+                <!-- Author Information -->
+                <h4 class="text-muted mb-3">By {{ book.author|default:"Unknown Author" }}</h4>
+
+                <hr class="my-4">
+
+                <!-- Synopsis Section -->
+                <h4 class="fw-bold mb-3">Synopsis</h4>
+                <p class="text-body-secondary lh-lg mb-0" style="font-size: 1.1rem;">
+                    {{ book.description|default:"No description available for this book." }}
+                </p>
+            </div>
+
+            <!-- REVIEWS & COMMENTS SECTION -->
+            <div class="card shadow-sm border-0 bg-body rounded-4 p-4 p-md-5">
+                <h4 class="fw-bold mb-4">Reviews & Discussion</h4>
+
+                <!-- Injects the existing comment list -->
+                <div class="mb-4">
+                    {% include 'comment_section.html' %}
+                </div>
+
+                <hr class="my-4">
+
+                <!-- Injects the form to add a new comment -->
+                <div>
+                    <h5 class="fw-bold mb-3">Leave a Review</h5>
+                    {% include 'add_comment_template.html' %}
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}
